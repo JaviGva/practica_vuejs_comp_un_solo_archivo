@@ -1,6 +1,22 @@
 <template>
-    <div>
-        <!-- TODO: Crear componente GitHub -->
+    <div class="row container mx-auto">
+        <input type="text" id="buscador" class="form-control">
+
+        <div class="alert alert-danger mt-5" v-if="alerta" role="alert">
+            El usuario no existe
+        </div>
+
+        <div v-else class="row mt-5">
+            <div class="card col-xl-3 col-lg-5 col-md-7 col-sm-9 col-10 mx-auto" v-if="mostrar">
+                <img :src="usuario.avatar_url" class="card-img-top" alt="...">
+                <div class="card-body row">
+                    <h5 class="card-title text-center">{{usuario.login}}</h5>
+                    <button @click="obtenerRepositorios()" class="btn btn-primary mx-auto">Repositorios</button>
+                    <a :href="'https://github.com/' + usuario.login" target="_blank" class="btn btn-light mx-auto mt-2">Url GitHub</a>
+
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -16,40 +32,65 @@ export default {
     data: function() {
         return {
             // TODO: crear variables de datos para el funcionamiento del componente
+            alerta: false,
+            usuario: null,
+            mostrar:false
         }
     },
     methods: {
         obtenerUsuario: function() {
-            // TODO: Función para obtener los datos de usuario de la API de GitHub
+        var url = 'https://api.github.com/users/';
 
-            // TODO: Añadir lógica para resetear los cambios en el interfaz: desactivar campo de envío,
-            // resetear mensaje de error, mostrar lista de repositorios,...
+        // Datos de autenticación
+        /*var userAuth = process.env.VUE_APP_USERNAME || "JaviGva";
+        var passAuth = process.env.VUE_APP_USERTOKEN || "Javi27520";
 
-            // Obtener datos de autenticación de usuario para hacer peticiones
-            // autenticadas a la API de GitHub
-            var userAuth = process.env.VUE_APP_USERNAME || "user";
-            var passAuth = process.env.VUE_APP_USERTOKEN || "pass";
+        var authString = userAuth + ':' + passAuth;
+        var headers = new Headers();
+        headers.append('Authorization', 'Basic ' + btoa(authString));
+        headers.append('Content-Type', 'application/json');
 
-            // TODO: realizar petición fetch par obtener los datos y mostrar la información en la página
-            // Ejemplo de paso de datos de autorización con fetch: https://stackoverflow.com/questions/43842793/basic-authentication-with-fetch
+        // Opciones de Fetch
+        var fetchOptions = {
+            method: 'GET',
+            headers: headers,
+            mode: 'cors',
+            credentials: 'include'
+        };*/
 
+
+        fetch(url+document.getElementById("buscador").value)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data)
+                this.usuario= data
+                this.alerta = false
+                this.mostrar = true
+            })
+            .catch(error => {
+                this.alerta=true
+                console.error('There was an error:', error)
+            });
         },
         obtenerRepositorios: function() {
             // TODO: Función para obtener los repositorios del usuario desde la API de GítHub
-            // La URL de los repositorios de usuario se puede obtener a través del campo 'repos_url' de los datos del usuario
-
-            // Obtener datos de autenticación de usuario para hacer peticiones
-            // autenticadas a la API de GitHub
-            var userAuth = process.env.VUE_APP_USERNAME || "user";
-            var passAuth = process.env.VUE_APP_USERTOKEN || "pass";
-
-
-            // TODO: realizar petición fetch par obtener los datos y mostrar la información en la página
-            // Ejemplo de paso de datos de autorización con fetch: https://stackoverflow.com/questions/43842793/basic-authentication-with-fetch
-
+            console.log("hola")
         }
+    },
+    mounted() {
+        var inputBuscador = document.getElementById("buscador")
+        inputBuscador.addEventListener('keyup', this.obtenerUsuario)
     }
 }
+
+
+
+
 </script>
 
 <style scoped>
