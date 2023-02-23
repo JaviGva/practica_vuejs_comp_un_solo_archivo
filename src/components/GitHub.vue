@@ -85,23 +85,21 @@ export default {
                 return response.json();
             })
             .then(data => {
-                console.log(data)
                 this.usuario= data
                 this.alerta = false
                 this.mostrarCard = true
                 this.mostrarLista = false
                 this.repos_url = 'https://api.github.com/users/'+data.login+'/repos'
             })
-            .catch(error => {
-                this.alerta=true
-                this.mostrarLista = false
+            .catch(
+                this.alerta=true,
+                this.mostrarLista = false,
                 this.mostrarCard = false
-                console.error('There was an error:', error)
-            });
+            );
         },
         obtenerRepositorios: function() {
             // TODO: Función para obtener los repositorios del usuario desde la API de GítHub
-            console.log("hola")
+            
             this.mostrarCard=false
             this.mostrarLista = true
 
@@ -113,19 +111,14 @@ export default {
                     return response.json();
                 })
                 .then(data => {
-                    console.log(data)
                     this.repolist=data
                 })
-                .catch(error => {
-                    console.error('There was an error:', error)
-                });
         }
     },
     mounted() {
         const vm = this;
         document.querySelector('#buscador').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                console.log("si")
                 vm.obtenerUsuario();
             }
         });
