@@ -7,7 +7,7 @@
         </div>
 
         <div v-else class="row mt-5">
-            <div class="card col-xl-3 col-lg-5 col-md-7 col-sm-9 col-10 mx-auto" v-if="mostrar">
+            <div class="card col-xl-3 col-lg-5 col-md-7 col-sm-9 col-10 mx-auto" v-if="mostrarCard">
                 <img :src="usuario.avatar_url" class="card-img-top" alt="...">
                 <div class="card-body row">
                     <h5 class="card-title text-center">{{usuario.login}}</h5>
@@ -16,25 +16,43 @@
 
                 </div>
             </div>
+            <div v-if="mostrarLista" class="row">
+                <div class="card col-4" >
+                    <img :src="usuario.avatar_url" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">{{usuario.login}}</h5>
+                        <button @click="obtenerRepositorios()" class="btn btn-primary col-6 mt-2">Repositorios</button>
+                        <a :href="'https://github.com/' + usuario.login" target="_blank" class="btn btn-light col-6 mt-2">Url GitHub</a>
+
+                    </div>
+                </div>
+
+                <GitHubRepos  :repolist="repolist" class="col-8"></GitHubRepos>
+            </div>
+            
         </div>
     </div>
 </template>
 
 <script>
-
+import GitHubRepos from '/src/components/GitHubRepos.vue';
 // TODO: Importar componente GitHubRepos
 
 export default {
     name: 'GitHub',
     components: {
         // TODO: Importar componente GitHubRepos
+        GitHubRepos
     },
     data: function() {
         return {
             // TODO: crear variables de datos para el funcionamiento del componente
             alerta: false,
             usuario: null,
-            mostrar:false
+            mostrarCard:false,
+            mostrarLista : false,
+            repos_url : "",
+            repolist: []
         }
     },
     methods: {
@@ -70,22 +88,49 @@ export default {
                 console.log(data)
                 this.usuario= data
                 this.alerta = false
-                this.mostrar = true
+                this.mostrarCard = true
+                this.mostrarLista = false
+                this.repos_url = 'https://api.github.com/users/'+data.login+'/repos'
             })
             .catch(error => {
                 this.alerta=true
+                this.mostrarLista = false
+                this.mostrarCard = false
                 console.error('There was an error:', error)
             });
         },
         obtenerRepositorios: function() {
             // TODO: Función para obtener los repositorios del usuario desde la API de GítHub
             console.log("hola")
+            this.mostrarCard=false
+            this.mostrarLista = true
+
+            fetch(this.repos_url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data)
+                    this.repolist=data
+                })
+                .catch(error => {
+                    console.error('There was an error:', error)
+                });
         }
     },
     mounted() {
-        var inputBuscador = document.getElementById("buscador")
-        inputBuscador.addEventListener('keyup', this.obtenerUsuario)
+        const vm = this;
+        document.querySelector('#buscador').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                console.log("si")
+                vm.obtenerUsuario();
+            }
+        });
     }
+
 }
 
 
